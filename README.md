@@ -47,7 +47,6 @@ This plugin is for use with [Cordova](http://incubator.apache.org/cordova/), and
 ### Contents
 
 - [LICENSE](#license)
-- [Manual Installation](#manual_installation)
 - [Automatic Installation](#automatic_installation)
 - [Plugin API](#plugin_api)
 - [Testing](#testing)
@@ -83,213 +82,6 @@ This plugin is for use with [Cordova](http://incubator.apache.org/cordova/), and
 
 
 
-
-##<a name="manual_installation"></a>Manual Installation
-
-### Manual Installation for Amazon Fire OS
-
-1) Install the ADM library
-
-- Download the [Amazon Mobile App SDK](https://developer.amazon.com/public/resources/development-tools/sdk) and unzip.
-- Create a folder called `ext_libs` in your project's `platforms/amazon-fireos` folder.
-- Copy `amazon-device-messaging-x.x.x.jar` into the `ext_libs` folder above.
-- Create a new text file called `ant.properties` in the `platforms/amazon-fireos` folder, and add a java.compiler.classpath entry pointing at the library. For example: `java.compiler.classpath=./ext_libs/amazon-device-messaging-1.0.1.jar`
-
-
-2) Copy the contents of the Push Notification Plugin's `src/amazon/com` folder to your project's `platforms/amazon-fireos/src/com` folder.
-
-3) Modify your `AndroidManifest.xml` and add the following lines to your manifest tag:
-
-```xml
-<permission android:name="$PACKAGE_NAME.permission.RECEIVE_ADM_MESSAGE" android:protectionLevel="signature" />
-<uses-permission android:name="$PACKAGE_NAME.permission.RECEIVE_ADM_MESSAGE" />
-<uses-permission android:name="com.amazon.device.messaging.permission.RECEIVE" />
-<uses-permission android:name="android.permission.WAKE_LOCK" />
-```
-
-4) Modify your `AndroidManifest.xml` and add the following **activity**, **receiver** and **service** tags to your **application** section.
-
-```xml
-<amazon:enable-feature android:name="com.amazon.device.messaging" android:required="true"/>
-<service android:exported="false" android:name="com.amazon.cordova.plugin.ADMMessageHandler" />
-<activity android:name="com.amazon.cordova.plugin.ADMHandlerActivity" />
-<receiver android:name="com.amazon.cordova.plugin.ADMMessageHandler$Receiver" android:permission="com.amazon.device.messaging.permission.SEND">
-	<intent-filter>
-        	<action android:name="com.amazon.device.messaging.intent.REGISTRATION" />
-                <action android:name="com.amazon.device.messaging.intent.RECEIVE" />
-                <category android:name="$PACKAGE_NAME" />
-	</intent-filter>
-</receiver>
-```
-
-5) If you are using Cordova 3.4.0 or earlier, modify your `AndroidManifest.xml` and add "amazon" XML namespace to <manifest> tag:
-
-```xml
-xmlns:amazon="http://schemas.amazon.com/apk/res/android"
-```
-
-6) Modify `res/xml/config.xml` to add a reference to PushPlugin:
-
-```xml
-<feature name="PushPlugin" >
-	<param name="android-package" value="com.amazon.cordova.plugin.PushPlugin"/>
-</feature>
-```
-
-7) Modify `res/xml/config.xml` to set config options to let Cordova know whether to display ADM message in the notification center or not. If not, provide the default message. By default, message will be visible in the notification. These config options are used if message arrives and app is not in the foreground (either killed or running in the background).
-
-```xml
-<preference name="showmessageinnotification" value="true" />
-<preference name="defaultnotificationmessage" value="New message has arrived!" />
-```
-
-8) Create an file called `api_key.txt` in the platforms/amazon-fireos/assets folder containing the API Key from the "Security Profile Android/Kindle Settings" tab on the [Amazon Developer Portal](https://developer.amazon.com/sdk/adm.html). For detailed steps on how to register for ADM please refer to section below: [Registering your app for Amazon Device Messaging (ADM)](#registering_for_adm)
-
-
-
-### Manual Installation for Android
-
-1) Install GCM support files
-
-- copy the contents of `src/android/com/` to your project's `src/com/` folder.
-- copy the contents of `libs/` to your `libs/` folder.
-- copy `{android_sdk_path}/extras/android/support/v13/android-support-v13.jar` to your `libs/` folder.
-
-The final hierarchy will likely look something like this:
-
-	{project_folder}
-		libs
-			gcm.jar
-			android-support-v13.jar
-			cordova-3.4.0.jar
-		src
-			com
-				plugin
-					gcm
-						CordovaGCMBroadcastReceiver.java
-						GCMIntentService.java
-						PushHandlerActivity.java
-						PushPlugin.java
-				{company_name}
-					{intent_name}
-						{intent_name}.java
-
-2) Modify your `AndroidManifest.xml` and add the following lines to your manifest tag:
-
-```xml
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-<uses-permission android:name="android.permission.GET_ACCOUNTS" />
-<uses-permission android:name="android.permission.WAKE_LOCK" />
-<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-<permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE" android:protectionLevel="signature" />
-<uses-permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE" />
-```
-
-3) Modify your `AndroidManifest.xml` and add the following **activity**, **receiver** and **service** tags to your **application** section. (See the Sample_AndroidManifest.xml file in the Example folder.)
-
-```xml
-<activity android:name="com.plugin.gcm.PushHandlerActivity"/>
-<receiver android:name="com.plugin.gcm.CordovaGCMBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND" >
-	<intent-filter>
-		<action android:name="com.google.android.c2dm.intent.RECEIVE" />
-		<action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-		<category android:name="$PACKAGE_NAME" />
-	</intent-filter>
-</receiver>
-<service android:name="com.plugin.gcm.GCMIntentService" />
-```
-
-4) Check that the launch mode for the main Cordova Activity is one of the **[singleXXX](http://developer.android.com/guide/topics/manifest/activity-element.html#lmode)** options in **AndroidManifest.xml**.
-
-```xml
-<activity ... android:launchMode="singleTop">
-```
-
-Otherwise a new activity instance, with a new webview, will be created when activating the notifications.
-
-5) Modify your `res/xml/config.xml` to include the following line in order to tell Cordova to include this plugin and where it can be found: (See the Sample_config.xml file in the Example folder)
-
-```xml
-<feature name="PushPlugin">
-  <param name="android-package" value="com.plugin.gcm.PushPlugin" />
-</feature>
-```
-
-6) Add the `PushNotification.js` script to your assets/www folder (or javascripts folder, wherever you want really) and reference it in your main index.html file. This file's usage is described in the **Plugin API** section below.
-
-```html
-<script type="text/javascript" charset="utf-8" src="PushNotification.js"></script>
-```
-
-### Manual Installation for iOS
-
-Copy the following files to your project's Plugins folder:
-
-```
-AppDelegate+notification.h
-AppDelegate+notification.m
-PushPlugin.h
-PushPlugin.m
-```
-
-Add a reference for this plugin to the plugins section in `config.xml`:
-
-```xml
-<feature name="PushPlugin">
-  <param name="ios-package" value="PushPlugin" />
-</feature>
-```
-
-Add the `PushNotification.js` script to your assets/www folder (or javascripts folder, wherever you want really) and reference it in your main index.html file.
-
-```html
-<script type="text/javascript" charset="utf-8" src="PushNotification.js"></script>
-```
-
-### Manual Installation for WP8
-
-Copy the following files to your project's Commands folder and add it to the VS project:
-
-```
-PushPlugin.cs
-```
-
-Add a reference to this plugin in `config.xml`:
-
-```xml
-<feature name="PushPlugin">
-  <param name="wp-package" value="PushPlugin" />
-</feature>
-```
-
-Add the `PushNotification.js` script to your assets/www folder (or javascripts folder, wherever you want really) and reference it in your main index.html file.
-```html
-<script type="text/javascript" charset="utf-8" src="PushNotification.js"></script>
-```
-
-Do not forget to reference the `cordova.js` as well.
-
-<script  type="text/javascript" charset="utf-8" src="cordova.js"></script>
-
-In your Visual Studio project add reference to the `Newtonsoft.Json.dll` as well - it is needed for serialization and deserialization of the objects.
-
-Also you need to enable the **"ID_CAP_PUSH_NOTIFICATION"** capability in **Properties->WMAppManifest.xml** of your project.
-
-### Manual Installation for Windows8
-
-Add the `src/windows8/PushPluginProxy.js` script to your `www` folder and reference it in your main index.html file.
-```html
-<script type="text/javascript" charset="utf-8" src="PushPluginProxy.js"></script>
-```
-
-Do not forget to reference the `cordova.js` as well.
-
-<script  type="text/javascript" charset="utf-8" src="cordova.js"></script>
-
-To receive toast notifications additional [toastCapable=’true’](http://msdn.microsoft.com/en-us/library/windows/apps/hh781238.aspx) attribute is required to be manually added in manifest file.
-
-
-
 ##<a name="automatic_installation"></a>Automatic Installation
 
 Below are the methods for installing this plugin automatically using command line tools. For additional info, take a look at the [Plugman Documentation](https://github.com/apache/cordova-plugman/blob/master/README.md) and [Cordova Plugin Specification](https://github.com/alunny/cordova-plugin-spec).
@@ -303,7 +95,7 @@ The plugin can be installed via the Cordova command line interface:
 1) Navigate to the root folder for your phonegap project. 2) Run the command.
 
 ```sh
-cordova plugin add https://github.com/phonegap-build/PushPlugin.git
+cordova plugin add https://github.com/boltex/PushPlugin.git
 ```
 
 ### Phonegap
@@ -313,7 +105,7 @@ The plugin can be installed using the Phonegap command line interface:
 1) Navigate to the root folder for your phonegap project. 2) Run the command.
 
 ```sh
-phonegap local plugin add https://github.com/phonegap-build/PushPlugin.git
+phonegap local plugin add https://github.com/boltex/PushPlugin.git
 ```
 
 ### Plugman
