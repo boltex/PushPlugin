@@ -1,4 +1,36 @@
-# Cordova Push Notifications Plugin for Android, iOS, WP8, Windows8, BlackBerry 10 and Amazon Fire OS
+# Cordova Push Notifications Plugin modified for use with katzer/cordova-plugin-background-mode
+
+MODIFIED GCMIntentService.java
+
+		protected void onMessage(Context context, Intent intent) {
+	        Log.d(TAG, "onMessage - context: " + context);
+
+	        // Extract the payload from the message
+	        Bundle extras = intent.getExtras();
+	        if (extras != null)
+	        {
+	            // if we are in the foreground, just surface the payload, else post it to the statusbar
+	            if (PushPlugin.isInForeground()) {
+	                extras.putBoolean("foreground", true);
+	                PushPlugin.sendExtras(extras);
+	            }
+	            else {
+	                extras.putBoolean("foreground", false);
+	                // *
+	                Log.d(TAG, "Trying to send to APP too!");
+	                PushPlugin.sendExtras(extras);
+	                // *
+
+	                /*
+	                // Send a notification if there is a message
+	                if (extras.getString("message") != null && extras.getString("message").length() != 0) {
+	                    createNotification(context, extras);
+	                }
+	                */
+
+	            }
+	        }
+	    }
 
 ## DESCRIPTION
 
