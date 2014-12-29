@@ -1,6 +1,6 @@
 # Cordova Push Notifications Plugin modified for use with katzer/cordova-plugin-background-mode
 
-MODIFIED GCMIntentService.java
+MODIFIED GCMIntentService.java TO ALWAYS REACT AS IF FOREGROUND. The notification will get sent to the app as if in foreground. This is to be used with the BACKGROUND-MODE plugin.
 
 		protected void onMessage(Context context, Intent intent) {
 	        Log.d(TAG, "onMessage - context: " + context);
