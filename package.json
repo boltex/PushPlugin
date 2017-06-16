@@ -1,0 +1,26 @@
+{
+  "name": "push-plugin",
+  "version": "0.1.0",
+  "description": "Push Plugin Boltex",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boltex/PushPlugin.git"
+  },
+  "keywords": [
+    "cordova",
+    "ecosystem:cordova",
+    "app",
+    "version",
+    "push",
+    "plugin"
+  ],
+  "author": "boltex",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/boltex/PushPlugin/issues"
+  },
+  "homepage": "https://github.com/boltex/PushPlugin#readme"
+}
